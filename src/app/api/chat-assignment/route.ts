@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     // Build context from chat history
-    const context = history ? history.map((h: any) => `${h.role}: ${h.content}`).join('\n') : '';
+    const context = history ? history.map((h: { role: string; content: string }) => `${h.role}: ${h.content}`).join('\n') : '';
 
     const prompt = `
       You are an AI assignment creation assistant for a team project management system.
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     try {
       const parsed = JSON.parse(response.replace(/```json|```/g, "").trim());
       return NextResponse.json(parsed);
-    } catch (parseError) {
+    } catch {
       // If not JSON, return as plain response
       return NextResponse.json({
         response: response.replace(/```json|```/g, "").trim(),
@@ -74,10 +74,10 @@ export async function POST(req: NextRequest) {
       });
     }
 
-  } catch (error: any) {
+  } catch (error) {
     console.error("Chat assignment error:", error);
     return NextResponse.json({
-      error: error.message || "Failed to process chat message",
+      error: error instanceof Error ? error.message : "Failed to process chat message",
       response: "Sorry, I encountered an error. Please try again.",
       assignments: null
     }, { status: 500 });

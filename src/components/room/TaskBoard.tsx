@@ -48,7 +48,7 @@ export default function TaskBoard({ roomId, role }: { roomId: string, role: "Lea
   const [editForm, setEditForm] = useState({
     title: "",
     description: "",
-    type: "assignment" as "presentation" | "assignment" | "both",
+    type: "assignment" as "assignment" | "project" | "quiz" | "discussion" | "presentation" | "both",
     deadline: ""
   });
 
@@ -638,7 +638,7 @@ export default function TaskBoard({ roomId, role }: { roomId: string, role: "Lea
                 <label className="block text-sm font-medium mb-1">Type</label>
                 <select
                   value={editForm.type}
-                  onChange={(e) => setEditForm({ ...editForm, type: e.target.value })}
+                  onChange={(e) => setEditForm({ ...editForm, type: e.target.value as "assignment" | "project" | "quiz" | "discussion" | "presentation" | "both" })}
                   className="w-full p-2 border rounded"
                 >
                   <option value="assignment">Assignment</option>

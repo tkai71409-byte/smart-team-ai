@@ -11,7 +11,7 @@ export interface Task {
   deadline: string; // ISO string for date and time
   status: "todo" | "in-progress" | "done";
   createdAt: any;
-  type: "presentation" | "assignment" | "both"; // new field
+  type: "assignment" | "project" | "quiz" | "discussion" | "presentation" | "both";
   submissions?: Submission[]; // new field
   evaluations?: Evaluation[]; // new field
 }

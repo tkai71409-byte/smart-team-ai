@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const webResults = await fetchWebResults(query);
 
     const sourceText = webResults
-      ? webResults.map((res, i) => `${i + 1}. ${res.title}\n${res.snippet}\n${res.url}`).join("\n\n")
+      ? webResults.map((res: { title: string; snippet: string; url: string }, i: number) => `${i + 1}. ${res.title}\n${res.snippet}\n${res.url}`).join("\n\n")
       : "";
 
     const model = genAI.getGenerativeModel({

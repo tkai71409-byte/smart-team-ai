@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+const pdfParse = require("pdf-parse");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyAQH99wT9humD2T-oE1eXuYEAOix6Q-ssM";
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -37,7 +38,7 @@ function cleanJsonText(raw: string): string {
   return text.trim();
 }
 
-function parseTaskArray(raw: string): any[] {
+function parseTaskArray(raw: string): Array<{ [key: string]: unknown }> {
   try {
     const parsed = JSON.parse(cleanJsonText(raw));
     return Array.isArray(parsed) ? parsed : [];
@@ -63,8 +64,7 @@ export async function POST(req: NextRequest) {
       const arrayBuffer = await fileRes.arrayBuffer();
 
       if (documentUrl.includes(".pdf") || documentUrl.includes("application%2Fpdf")) {
-      const pdfParse = require("pdf-parse");
-      const pdfData = await pdfParse(Buffer.from(arrayBuffer));
+        const pdfData = await pdfParse(Buffer.from(arrayBuffer));
         text = pdfData.text;
       } else {
         text = Buffer.from(arrayBuffer).toString("utf-8");
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
 
     const chunks = splitTextIntoChunks(text, MAX_CHUNK_SIZE);
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-    const allTasks: any[] = [];
+    const allTasks: Array<{ [key: string]: unknown }> = [];
 
     for (let i = 0; i < chunks.length; i++) {
       const chunkPrompt = `
@@ -103,8 +103,8 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ tasks: allTasks });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Task generation error:", error);
-    return NextResponse.json({ error: error.message || "Failed to generate tasks" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to generate tasks" }, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/firebase/config";
-import { collection, addDoc, serverTimestamp, query, where, getDocs } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, query, where, getDocs, type Query } from "firebase/firestore";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,21 +9,21 @@ export async function GET(req: NextRequest) {
     const taskId = url.searchParams.get("taskId");
 
     const feedbackRef = collection(db, "feedback");
-    let queryRef = feedbackRef;
+    let queryRef: Query = feedbackRef;
 
     if (roomId) queryRef = query(feedbackRef, where("roomId", "==", roomId));
     if (taskId) queryRef = query(queryRef, where("taskId", "==", taskId));
 
     const feedbackSnapshot = await getDocs(queryRef);
-    const items: any[] = [];
+    const items: Array<{ id: string; [key: string]: unknown }> = [];
     feedbackSnapshot.forEach((doc) => {
       items.push({ id: doc.id, ...doc.data() });
     });
 
     return NextResponse.json({ feedback: items });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Feedback GET error:", error);
-    return NextResponse.json({ error: error.message || "Failed to fetch feedback" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to fetch feedback" }, { status: 500 });
   }
 }
 
@@ -46,8 +46,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ success: true });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Feedback error:", error);
-    return NextResponse.json({ error: error.message || "Failed to submit feedback" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to submit feedback" }, { status: 500 });
   }
 }

@@ -40,8 +40,8 @@ export async function POST(req: NextRequest) {
 
     const data = await gcalRes.json();
     return NextResponse.json({ success: true, event: data });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Calendar POST error:", error);
-    return NextResponse.json({ error: error.message || "Failed to create calendar event" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to create calendar event" }, { status: 500 });
   }
 }

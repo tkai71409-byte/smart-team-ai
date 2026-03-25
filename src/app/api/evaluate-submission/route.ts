@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { evaluateSubmission, Task } from "@/lib/firebase/tasks";
-import { getRoomSettings } from "@/lib/firebase/settings";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 
@@ -58,8 +57,8 @@ export async function POST(req: NextRequest) {
     await evaluateSubmission(taskId, submissionId, "AI", evaluation.score, evaluation.relevance, evaluation.comment);
 
     return NextResponse.json({ success: true, evaluation });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Evaluate submission error:", error);
-    return NextResponse.json({ error: error.message || "Failed to evaluate submission" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to evaluate submission" }, { status: 500 });
   }
 }
